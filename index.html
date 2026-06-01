@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WOLFAITH Engine - Peace, Be Still (A1)</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&family=Playfair+Display:ital,wght@0,400;0,600;0,800;1,400;1,600&family=Cinzel:wght@400;700&display=swap');
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: radial-gradient(circle at center, #0a111a 0%, #03060a 100%);
+            color: #f4f4f5; 
+            overflow: hidden; 
+            margin: 0; height: 100vh; width: 100vw;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Classic Fonts */
+        .font-serif-classic { font-family: 'Playfair Display', serif; }
+        .font-sans-ui { font-family: 'Inter', sans-serif; }
+        .font-cinzel { font-family: 'Cinzel', serif; }
+
+        /* Tokens */
+        .text-sacred-gold { color: #D4AF37; }
+        .bg-sacred-gold { background-color: #D4AF37; }
+
+        /* V3 Storm Aesthetics */
+        .water-texture {
+            position: absolute; inset: 0;
+            background-image: url("https://www.transparenttextures.com/patterns/black-scales.png");
+            opacity: 0.2; mix-blend-mode: color-dodge; pointer-events: none; z-index: 0;
+            animation: drift 60s linear infinite;
+        }
+        @keyframes drift { 0% { background-position: 0 0; } 100% { background-position: 1000px 1000px; } }
+
+        /* Architectural Framework */
+        .gold-foil-frame { position: fixed; inset: 15px 25px; pointer-events: none; z-index: 49; border: 1px solid rgba(212, 175, 55, 0.2); outline: 1px dashed rgba(212, 175, 55, 0.1); outline-offset: -5px; }
+        .gilded-edges { position: fixed; top: 0; bottom: 0; width: 12px; pointer-events: none; z-index: 10; background: repeating-linear-gradient(to bottom, #4a6582 0px, #8ba8cc 2px, #2c445e 4px, #a3c2e0 5px); box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
+        .gilded-edge-left { left: 0; border-right: 2px solid rgba(0,0,0,0.9); }
+        .gilded-edge-right { right: 0; border-left: 2px solid rgba(0,0,0,0.9); }
+        .bookmark-ribbon { position: fixed; top: -10px; right: 12%; width: 45px; height: 160px; z-index: 60; background: linear-gradient(to right, #0a192f, #1a365d, #2c5282, #1a365d, #0a192f); box-shadow: -5px 10px 20px rgba(0,0,0,0.8), inset 0 -10px 20px rgba(0,0,0,0.5); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 85%, 0 100%); pointer-events: none; transform: rotate(3deg); border-bottom: 2px solid rgba(139,168,204,0.5); }
+
+        /* UI Elements */
+        .safe-scroll-container { display: flex; flex-direction: column; height: 100%; overflow-y: auto; overflow-x: hidden; padding: 0 30px;}
+        .safe-scroll-container::-webkit-scrollbar { width: 6px; }
+        .safe-scroll-container::-webkit-scrollbar-thumb { background: rgba(139,168,204,0.4); border-radius: 4px; }
+        .safe-scroll-content { margin: auto; width: 100%; padding: 4rem 1rem 8rem 1rem; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+        .bible-card { background: linear-gradient(180deg, rgba(10, 25, 47, 0.95) 0%, rgba(3, 6, 10, 0.98) 100%); backdrop-filter: blur(20px); border: 2px solid #1a365d; box-shadow: 0 0 0 1px rgba(139,168,204,0.1), 0 0 0 4px rgba(3,6,10,0.8), 0 0 0 5px rgba(139,168,204,0.3), 0 30px 60px rgba(0,0,0,0.9); border-radius: 6px; position: relative; width: 100%; max-width: 1000px; padding: 3rem; }
+        .bible-card::before { content: ''; position: absolute; inset: 8px; border: 1px dashed rgba(139,168,204,0.2); pointer-events: none; }
+        
+        .btn-gold { background: linear-gradient(135deg, #FFDF73 0%, #D4AF37 40%, #996515 80%, #5c3c08 100%); color: #050505; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; border: 1px solid #FFED99; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3), inset 0 2px 5px rgba(255,255,255,0.5); transition: all 0.3s ease; border-radius: 3px; padding: 16px 36px; cursor: pointer; text-shadow: 0 1px 1px rgba(255,255,255,0.3); display: inline-flex; align-items: center; justify-content: center;}
+        .btn-gold:hover:not(:disabled) { filter: brightness(1.15); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(212, 175, 55, 0.6); }
+        .btn-ocean { background: linear-gradient(135deg, #8ba8cc 0%, #4a6582 50%, #2c445e 100%); color: #fff; border: 1px solid #a3c2e0; }
+
+        /* Story Chunk */
+        .reader-chunk { background: rgba(255,255,255,0.02); border-left: 4px solid #8ba8cc; padding: 2rem; margin-bottom: 2rem; border-radius: 0 8px 8px 0; transition: all 0.5s; }
+        .reader-chunk:hover { background: rgba(139,168,204,0.05); }
+
+        /* The Storm Calmer Mechanic */
+        .storm-container { position: relative; width: 100%; height: 350px; background: #02060a; border: 2px solid #1a365d; border-radius: 8px; overflow: hidden; box-shadow: inset 0 0 50px rgba(0,0,0,0.9); margin-bottom: 2rem; transition: background 2s; }
+        .storm-container.calm { background: linear-gradient(to bottom, #1a365d 0%, #0a192f 100%); }
+        .wave { position: absolute; bottom: -20%; left: -50%; width: 200%; height: 60%; background: #0a192f; border-top: 5px solid #2c5282; border-radius: 40%; opacity: 0.8; animation: rock 3s infinite alternate ease-in-out; transition: all 2s; }
+        .wave:nth-child(2) { bottom: -30%; background: #06101c; border-top: 3px solid #1a365d; animation: rock 4s infinite alternate-reverse ease-in-out; opacity: 0.9; }
+        .calm .wave { height: 30%; bottom: -10%; border-top: 2px solid #4a6582; animation: rockCalm 8s infinite alternate ease-in-out; opacity: 0.6; }
+        
+        .rain { position: absolute; top: -100px; left: 0; width: 100%; height: 100%; background: transparent; z-index: 10; pointer-events: none; transition: opacity 2s; }
+        .rain::before { content: ''; position: absolute; width: 1px; height: 100px; background: rgba(255,255,255,0.4); box-shadow: 100px 50px rgba(255,255,255,0.3), 200px 20px rgba(255,255,255,0.3), 300px 80px rgba(255,255,255,0.3), 400px 10px rgba(255,255,255,0.4), 500px 90px rgba(255,255,255,0.3), 600px 30px rgba(255,255,255,0.4); animation: rainFall 0.4s linear infinite; }
+        .calm .rain { opacity: 0; }
+        
+        .lightning { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 5; }
+        .storm-raging .lightning { animation: flash 5s infinite; }
+
+        .sun-rise { position: absolute; top: 10%; left: 50%; width: 100px; height: 100px; background: radial-gradient(circle, #FFDF73 0%, transparent 70%); transform: translateX(-50%) translateY(200px); opacity: 0; transition: all 3s ease-out; z-index: 1; }
+        .calm .sun-rise { transform: translateX(-50%) translateY(0); opacity: 1; box-shadow: 0 0 100px #D4AF37; }
+
+        @keyframes rock { 0% { transform: rotate(-5deg) translateY(0); } 100% { transform: rotate(5deg) translateY(-20px); } }
+        @keyframes rockCalm { 0% { transform: rotate(-1deg); } 100% { transform: rotate(1deg); } }
+        @keyframes rainFall { 0% { transform: translateY(0); } 100% { transform: translateY(400px); } }
+        @keyframes flash { 0%, 95%, 98% { opacity: 0; } 96%, 99% { opacity: 0.8; } }
+
+        /* Illuminated Manuscript */
+        .vocab-trigger { color: #8ba8cc; border-bottom: 2px dashed rgba(139,168,204,0.4); cursor: pointer; transition: all 0.3s; position: relative; font-weight: bold; }
+        .vocab-trigger:hover { color: #fff; border-bottom-style: solid; text-shadow: 0 0 15px rgba(139,168,204,0.9); }
+        .davinci-sketch { background: #d4c4a8; background-image: url("https://www.transparenttextures.com/patterns/cream-paper.png"); border: 2px solid #a89473; border-radius: 4px; padding: 2rem; margin-top: 1rem; box-shadow: inset 0 0 30px rgba(139,69,19,0.3), 0 15px 30px rgba(0,0,0,0.6); color: #4a3622; position: relative; overflow: hidden; display: flex; gap: 2rem; align-items: center; animation: slideDownFade 0.5s ease-out forwards; }
+        
+        /* Teacher Tools */
+        .side-panel { position: fixed; top: 0; right: -100%; width: 100%; max-width: 500px; height: 100vh; background: rgba(2, 6, 10, 0.98); backdrop-filter: blur(20px); border-left: 2px solid #8ba8cc; z-index: 100; transition: right 0.5s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; box-shadow: -20px 0 50px rgba(0,0,0,0.9); }
+        .side-panel.open { right: 0; }
+        .praise-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .praise-text { font-family: 'Playfair Display', serif; font-size: 5rem; color: #8ba8cc; text-shadow: 0 0 40px rgba(139,168,204,1), 0 0 80px rgba(139,168,204,0.6); animation: praiseFade 3s ease-out forwards; font-weight: 900; font-style: italic; }
+        
+        @keyframes praiseFade { 0% { opacity: 0; transform: scale(0.5); } 20% { opacity: 1; transform: scale(1.1); } 80% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.5); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fadeIn { animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes slideDownFade { from { opacity: 0; transform: translateY(-10px); height: 0; padding: 0; } to { opacity: 1; transform: translateY(0); height: auto; } }
+        
+        .lang-toggle { position: absolute; top: 2rem; right: 3rem; z-index: 100; background: rgba(10, 10, 10, 0.8); border: 1px solid rgba(139, 168, 204, 0.4); color: #8ba8cc; padding: 8px 16px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; transition: all 0.3s; backdrop-filter: blur(5px); display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .lang-toggle:hover { background: rgba(139, 168, 204, 0.2); color: #FFF; border-color: #8ba8cc; }
+    </style>
+</head>
+<body class="selection:bg-[#8ba8cc]/30 selection:text-white">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const YOUTUBE_ID = "yyzwCpofQSA"; 
+
+        const t = (obj, lang) => {
+            if (!obj) return '';
+            if (typeof obj === 'string') return obj;
+            return obj[lang] || obj['en'] || '';
+        };
+
+        const Icon = ({ name, size = 24, className = "" }) => <i className={`fa-solid fa-${name} ${className}`} style={{ fontSize: size }}></i>;
+        
+        const Divider = () => (
+            <div className="flex items-center justify-center w-full my-8 opacity-60">
+                <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-[#8ba8cc] to-transparent"></div>
+                <div className="mx-6 text-[#8ba8cc] text-sm"><Icon name="water" size={14} /></div>
+                <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent via-[#8ba8cc] to-transparent"></div>
+            </div>
+        );
+
+        const TeacherTools = ({ lang, toggleLang }) => {
+            const [open, setOpen] = useState(false);
+            const [praise, setPraise] = useState(false);
+
+            const triggerPraise = () => { setPraise(true); setTimeout(() => setPraise(false), 3000); };
+
+            return (
+                <React.Fragment>
+                    <div className="absolute top-6 left-6 z-[100] flex gap-4 ml-6 mt-2">
+                        <button onClick={() => setOpen(!open)} className="bg-black/80 border-2 border-[#8ba8cc]/50 text-[#8ba8cc] w-12 h-12 rounded-full hover:bg-[#8ba8cc]/20 transition-all shadow-[0_0_15px_rgba(0,0,0,0.8)] flex items-center justify-center backdrop-blur-md" title={lang === 'en' ? "Teacher's Board" : "Lousa do Professor"}>
+                            <Icon name="chalkboard" size={18} />
+                        </button>
+                        <button onClick={triggerPraise} className="bg-black/80 border-2 border-emerald-500/50 text-emerald-400 w-12 h-12 rounded-full hover:bg-emerald-500/20 transition-all shadow-[0_0_15px_rgba(0,0,0,0.8)] flex items-center justify-center backdrop-blur-md" title={lang === 'en' ? "Send Praise" : "Enviar Elogio"}>
+                            <Icon name="star" size={18} />
+                        </button>
+                    </div>
+
+                    <div className={`fixed top-0 left-0 w-full max-w-sm h-full bg-black/95 border-r-2 border-[#8ba8cc] z-[90] transform transition-transform duration-500 flex flex-col p-8 shadow-[20px_0_50px_rgba(0,0,0,0.9)] ${open ? 'translate-x-0' : '-translate-x-full'}`}>
+                        <div className="flex justify-between items-center mb-8 pt-16 border-b border-zinc-800 pb-4">
+                            <h2 className="text-[#8ba8cc] font-serif-classic text-2xl italic flex items-center gap-3"><Icon name="feather" size={20}/> Theological Notes</h2>
+                            <button onClick={() => setOpen(false)} className="text-zinc-500 hover:text-white transition-colors"><Icon name="xmark" size={28}/></button>
+                        </div>
+                        <textarea className="flex-1 w-full bg-[#02060a] border border-zinc-800 rounded p-6 text-zinc-300 font-sans-ui text-lg leading-relaxed resize-none outline-none focus:border-[#8ba8cc] focus:shadow-[0_0_15px_rgba(139,168,204,0.2)] transition-all shadow-inner" placeholder={lang === 'en' ? "Write your teaching notes, vocabulary, or theology explanations here..." : "Escreva as notas da aula, vocabulário ou explicações aqui..."}></textarea>
+                    </div>
+
+                    {praise && (
+                        <div className="praise-overlay">
+                            <div className="praise-text flex flex-col items-center">
+                                <Icon name="crown" size={100} className="mb-6 text-[#8ba8cc]" />
+                                <span>{lang === 'en' ? "EXCELLENT!" : "EXCELENTE!"}</span>
+                            </div>
+                        </div>
+                    )}
+                </React.Fragment>
+            );
+        };
+
+        const CoverSlide = ({ s, lang, next }) => (
+            <div className="text-center animate-fadeIn flex flex-col items-center w-full max-w-4xl z-10">
+                <Icon name="cloud-bolt" size={60} className="text-[#8ba8cc] mb-8 drop-shadow-[0_0_30px_rgba(139,168,204,0.8)]" />
+                <p className="text-[#8ba8cc] font-sans-ui font-bold tracking-[0.5em] text-xs uppercase mb-6 drop-shadow-md">WOLFAITH Engine</p>
+                <h1 className="text-5xl md:text-8xl font-serif-classic text-white mb-6 italic tracking-tight drop-shadow-[0_0_20px_rgba(0,0,0,1)]">{t(s.title, lang)}</h1>
+                <h2 className="text-xl md:text-2xl text-[#a3c2e0] font-sans-ui font-black mb-8 tracking-[0.3em] uppercase drop-shadow-md">{t(s.subtitle, lang)}</h2>
+                <Divider />
+                <div className="flex gap-4 text-xs font-bold text-zinc-300 uppercase tracking-widest mb-12 bg-[#02060a]/80 px-6 py-3 border border-[#8ba8cc]/30 rounded backdrop-blur-md">
+                    <span>{s.level}</span> <span className="text-[#8ba8cc]">|</span> <span>{s.grammar}</span>
+                </div>
+                <button onClick={next} className="btn-gold btn-ocean text-lg px-12 py-4"><Icon name="play" className="mr-3" /> {lang === 'en' ? 'Start Journey' : 'Iniciar Jornada'}</button>
+            </div>
+        );
+
+        const GuideSlide = ({ s, lang }) => (
+            <div className="bible-card text-left animate-fadeIn z-10 mx-auto">
+                <div className="flex items-center gap-4 mb-8 border-b-2 border-[#8ba8cc]/30 pb-6">
+                    <Icon name="scroll" size={40} className="text-[#8ba8cc]" />
+                    <h2 className="text-3xl font-serif-classic text-[#8ba8cc]">{t(s.title, lang)}</h2>
+                </div>
+                <p className="text-zinc-200 font-sans-ui text-xl leading-relaxed">{t(s.content, lang)}</p>
+            </div>
+        );
+
+        const LexiconSlide = ({ s, lang }) => (
+            <div className="w-full max-w-5xl text-center animate-fadeIn z-10">
+                <h2 className="text-2xl font-sans-ui font-black mb-12 text-[#8ba8cc] uppercase tracking-[0.3em] drop-shadow-md">{t(s.title, lang)}</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {s.words.map((w, i) => (
+                        <div key={i} className="bible-card !p-8 flex flex-col items-center hover:-translate-y-2 transition-transform shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
+                            <div className="w-20 h-20 rounded-full bg-[#06101c] border border-[#1a365d] flex items-center justify-center mb-6 shadow-inner">
+                                {w.emoji ? <span className="text-4xl drop-shadow-md">{w.emoji}</span> : <Icon name={w.icon} size={35} className="text-[#8ba8cc]" />}
+                            </div>
+                            <p className="text-3xl font-serif-classic text-white mb-3">{w.word}</p>
+                            <p className="text-sm font-sans-ui text-[#a3c2e0] uppercase tracking-widest font-bold">{t(w.meaning, lang)}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+
+        const ReaderSlide = ({ s, lang }) => {
+            return (
+                <div className="w-full max-w-4xl mx-auto flex flex-col items-center z-10 animate-fadeIn text-center">
+                    <p className="text-[#8ba8cc] font-sans-ui font-bold tracking-[0.3em] text-[10px] uppercase mb-4">Easy Reader</p>
+                    <h2 className="text-4xl font-serif-classic italic text-white mb-10">{t(s.title, lang)}</h2>
+                    
+                    <div className="w-full text-left">
+                        {s.chunks.map((chunk, i) => (
+                            <div key={i} className="reader-chunk flex gap-6 items-center">
+                                <div className="w-4 h-4 rounded-full bg-[#8ba8cc] opacity-50 flex-shrink-0 shadow-[0_0_10px_rgba(139,168,204,0.8)]"></div>
+                                <div>
+                                    <p className={`font-serif-classic text-3xl md:text-4xl leading-relaxed text-white transition-all ${lang === 'pt' ? 'mb-2' : ''}`}>{chunk.en}</p>
+                                    {lang === 'pt' && (
+                                        <p className="font-sans-ui text-lg text-[#8ba8cc] uppercase tracking-widest font-bold opacity-90 animate-fadeIn">{chunk.pt}</p>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const GrammarSlide = ({ s, lang }) => (
+            <div className="bible-card text-center animate-fadeIn z-10 mx-auto">
+                <Icon name="puzzle-piece" size={50} className="text-[#8ba8cc] mb-6 drop-shadow-md" />
+                <h2 className="text-3xl font-sans-ui font-black mb-4 text-white tracking-[0.2em] uppercase">{t(s.title, lang)}</h2>
+                <p className="text-zinc-400 mb-10 font-serif-classic italic text-xl">{t(s.subtitle, lang)}</p>
+                
+                <div className="grid md:grid-cols-2 gap-6 text-left max-w-3xl mx-auto">
+                    {s.rules.map((rule, idx) => (
+                        <div key={idx} className="bg-[#02060a] border border-[#1a365d] p-8 rounded shadow-inner">
+                            <p className="text-[#8ba8cc] font-bold text-3xl mb-2 font-serif-classic">{rule.enPrefix} <span className="text-white">{rule.enVerb}</span></p>
+                            {lang === 'pt' && (
+                                <p className="text-zinc-500 text-xs uppercase tracking-widest mb-4 border-b border-zinc-800 pb-2 animate-fadeIn">{rule.ptTranslation}</p>
+                            )}
+                            <p className="text-xl text-white font-sans-ui mt-4">{rule.enExample}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+
+        const ScholarDeskSlide = ({ title, content, lang }) => (
+            <div className="flex flex-col items-center justify-center h-full w-full max-w-4xl mx-auto p-8 animate-fadeIn z-10 text-center">
+                <div className="bible-card">
+                    <div className="flex items-center gap-4 mb-8 border-b border-[#8ba8cc]/30 pb-4 justify-center">
+                        <Icon name="book-open" className="text-[#8ba8cc] w-6 h-6" />
+                        <h2 className="font-sans-ui font-black text-xl text-[#8ba8cc] uppercase tracking-[0.2em]">{t(title, lang)}</h2>
+                    </div>
+                    <p className="font-serif-classic text-2xl leading-loose text-zinc-300">
+                        {t(content, lang)}
+                    </p>
+                </div>
+            </div>
+        );
+
+        const VideoSlide = ({ title, mission, start, end, lang }) => {
+            const videoSrc = `https://www.youtube.com/embed/${YOUTUBE_ID}?start=${start || 0}${end ? '&end='+end : ''}&rel=0&modestbranding=1&showinfo=0`;
+            return (
+                <div className="flex flex-col items-center justify-center h-full w-full max-w-5xl mx-auto p-6 animate-fadeIn text-center z-10">
+                    <h2 className="text-4xl font-serif-classic italic text-[#8ba8cc] mb-4 drop-shadow-md">{t(title, lang)}</h2>
+                    <p className="text-base text-zinc-300 font-sans-ui font-black tracking-[0.2em] uppercase mb-10">{t(mission, lang)}</p>
+                    <div className="w-full aspect-video bg-black border-4 border-[#8ba8cc]/40 shadow-[0_20px_50px_rgba(0,0,0,0.9)] p-2 rounded-lg relative">
+                        <div className="absolute inset-0 border border-[#8ba8cc]/20 rounded-md pointer-events-none"></div>
+                        <iframe className="w-full h-full rounded" src={videoSrc} frameBorder="0" allow="autoplay; encrypted-media" allowFullScreen></iframe>
+                    </div>
+                </div>
+            );
+        };
+
+        const ScriptSlide = ({ speaker, quote, analysis, grammarNote, lang }) => (
+            <div className="flex flex-col items-center justify-center h-full w-full max-w-5xl mx-auto p-6 animate-fadeIn z-10">
+                <p className="text-zinc-500 font-sans-ui font-bold tracking-[0.3em] text-[10px] uppercase mb-8">Text Analysis</p>
+                <div className="w-full flex flex-col md:flex-row gap-8 items-stretch">
+                    <div className="flex-[1.5] bible-card !p-10 flex flex-col justify-center border-l-4 border-l-[#8ba8cc]">
+                        <p className="text-xs text-[#8ba8cc] font-bold uppercase tracking-widest mb-4">{t(speaker, lang)}</p>
+                        <p className="text-3xl md:text-4xl text-white font-serif-classic italic leading-relaxed">"{t(quote, lang)}"</p>
+                    </div>
+                    <div className="flex-1 flex flex-col gap-4">
+                        <div className="bg-[#02060a]/80 p-6 border border-zinc-800 rounded">
+                            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2">{lang === 'en' ? 'Meaning' : 'Significado'}</p>
+                            <p className="text-base text-zinc-300 font-sans-ui leading-relaxed">{t(analysis, lang)}</p>
+                        </div>
+                        <div className="bg-[#0a192f]/80 p-6 border border-[#2c5282]/30 rounded">
+                            <p className="text-[10px] text-[#8ba8cc] font-bold uppercase tracking-widest mb-2">{lang === 'en' ? 'Grammar Rule' : 'Regra Gramatical'}</p>
+                            <p className="text-base text-white font-sans-ui leading-relaxed">{t(grammarNote, lang)}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const QuizSlide = ({ question, options, answerIndex, explanation, nextAction, lang }) => {
+            const [selected, setSelected] = useState(null);
+            return (
+                <div className="flex flex-col items-center justify-center h-full w-full max-w-4xl mx-auto p-8 animate-fadeIn text-center z-10">
+                    <p className="text-[#8ba8cc] font-sans-ui font-bold tracking-[0.3em] text-[10px] uppercase mb-8">{lang === 'en' ? 'Observation Check' : 'Verificação'}</p>
+                    <h2 className="text-3xl md:text-4xl font-serif-classic italic text-white mb-10">{t(question, lang)}</h2>
+                    
+                    <div className="w-full flex flex-col gap-4">
+                        {options.map((opt, i) => (
+                            <button key={i} onClick={() => {
+                                setSelected(i);
+                                if(i === answerIndex) setTimeout(nextAction, 2500);
+                            }} className={`p-6 text-left border rounded transition-all 
+                                ${selected === i && i === answerIndex ? 'bg-emerald-900/30 border-emerald-500' : 
+                                  selected === i && i !== answerIndex ? 'bg-red-900/30 border-red-500' : 
+                                  'bg-black/50 border-zinc-700 hover:border-[#8ba8cc]'}`}>
+                                <p className="text-xl text-white font-sans-ui">{t(opt, lang)}</p>
+                            </button>
+                        ))}
+                    </div>
+
+                    {selected !== null && (
+                        <div className="mt-8">
+                            {selected === answerIndex ? 
+                                <p className="text-emerald-400 font-bold text-lg animate-fadeIn">{t(explanation, lang)}</p> : 
+                                <p className="text-red-400 font-bold text-lg animate-fadeIn">{lang === 'en' ? "Incorrect. Try again." : "Incorreto. Tente de novo."}</p>
+                            }
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const StormCalmerSlide = ({ s, lang, nextStep }) => {
+            const [phase, setPhase] = useState(0); 
+            const [errorMsg, setErrorMsg] = useState("");
+
+            const handleVerbClick = (verb) => {
+                if (phase === 2) return;
+                
+                const currentTask = s.tasks[phase];
+                if (verb === currentTask.correctVerb) {
+                    setErrorMsg("");
+                    const nextPhase = phase + 1;
+                    setPhase(nextPhase);
+                    if (nextPhase === 2) {
+                        setTimeout(nextStep, 5000);
+                    }
+                } else {
+                    setErrorMsg(lang === 'en' ? "Incorrect. The storm rages on." : "Incorreto. A tempestade continua.");
+                }
+            };
+
+            return (
+                <div className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center animate-fadeIn text-center z-10">
+                    <h2 className="text-2xl font-sans-ui font-black mb-4 text-[#8ba8cc] uppercase tracking-[0.3em] drop-shadow-md">{t(s.title, lang)}</h2>
+                    <p className="text-zinc-300 font-serif-classic italic mb-2 text-xl">{t(s.instruction, lang)}</p>
+
+                    <div className={`storm-container mt-8 ${phase === 0 ? 'storm-raging' : phase === 2 ? 'calm' : ''}`}>
+                        <div className="sun-rise"></div>
+                        <div className="lightning"></div>
+                        <div className="rain"></div>
+                        <div className="wave"></div>
+                        <div className="wave"></div>
+                        
+                        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-black/40 p-6">
+                            {phase < 2 ? (
+                                <div className="w-full max-w-md animate-fadeIn">
+                                    <p className="text-2xl font-serif-classic italic text-white mb-6 bg-black/60 p-4 rounded border border-[#1a365d]">
+                                        {s.tasks[phase].subject} <span className="text-[#8ba8cc] font-bold">_____</span> {s.tasks[phase].object}
+                                    </p>
+                                    <div className="flex gap-4 justify-center">
+                                        {s.tasks[phase].verbs.map(v => (
+                                            <button key={v} onClick={() => handleVerbClick(v)} className="bg-[#1a365d]/80 border border-[#8ba8cc] text-white font-bold px-6 py-3 rounded hover:bg-[#8ba8cc] hover:text-black transition-colors">
+                                                {v}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <p className="text-red-400 font-bold uppercase tracking-widest text-sm mt-4 h-6">{errorMsg}</p>
+                                </div>
+                            ) : (
+                                <div className="text-center animate-fadeIn">
+                                    <h3 className="text-5xl font-serif-classic italic text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]">"Peace, be still."</h3>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const IlluminatedText = ({ lang }) => {
+            const [isBookOpen, setIsBookOpen] = useState(false);
+            const [openKey, setOpenKey] = useState(null);
+
+            const verses = {
+                en: "He is {waking_up}. He speaks to the wind: '{Peace}, be {still}.' The wind {stops}.",
+                pt: "Ele está a {waking_up}. Ele fala com o vento: '{Peace}, {still}.' O vento {stops}."
+            };
+            
+            const glossary = {
+                "waking_up": { 
+                    word: { en: "waking up", pt: "acordar" }, icon: "sun", title: { en: "Waking Up", pt: "Acordar" },
+                    en: "Action happening now.", pt: "Ação a acontecer agora.", 
+                    sketch: { en: "Present Continuous. He is sleeping, now He is waking up.", pt: "Presente Contínuo. Ele está a dormir, agora está a acordar." } 
+                },
+                "Peace": { 
+                    word: { en: "Peace", pt: "Paz" }, icon: "dove", title: { en: "Peace", pt: "Paz" },
+                    en: "Quiet, calm, no fear.", pt: "Silêncio, calma, sem medo.", 
+                    sketch: { en: "The opposite of panic. Jesus has peace inside Him.", pt: "O oposto de pânico. Jesus tem paz dentro de Si." } 
+                },
+                "still": { 
+                    word: { en: "still", pt: "aquieta-te" }, icon: "hand", title: { en: "Still", pt: "Quieto" },
+                    en: "Not moving. Calm.", pt: "Sem movimento. Calmo.", 
+                    sketch: { en: "An imperative command. Jesus tells nature to stop moving.", pt: "Um comando imperativo. Jesus diz à natureza para parar de se mover." } 
+                },
+                "stops": { 
+                    word: { en: "stops", pt: "pára" }, icon: "stop", title: { en: "Stops", pt: "Pára" },
+                    en: "To cease moving.", pt: "Deixar de se mover.", 
+                    sketch: { en: "Nature obeys the creator immediately.", pt: "A natureza obedece ao criador imediatamente." } 
+                }
+            };
+
+            const renderVerse = () => {
+                let res = verses[lang];
+                Object.keys(glossary).forEach(key => {
+                    const displayWord = glossary[key].word[lang];
+                    res = res.replace(`{${key}}`, `<span class="vocab-trigger" data-key="${key}">${displayWord}</span>`);
+                });
+                return <div dangerouslySetInnerHTML={{ __html: res }} onClick={(e) => {
+                    if(e.target.classList.contains('vocab-trigger')) {
+                        const key = e.target.dataset.key;
+                        setOpenKey(openKey === key ? null : key);
+                    }
+                }} />;
+            };
+
+            return (
+                <div className="w-full flex justify-center animate-fadeIn z-10 mx-auto">
+                    {!isBookOpen ? (
+                        <div onClick={() => setIsBookOpen(true)} className="flex flex-col items-center justify-center cursor-pointer group mt-10">
+                            <div className="relative w-56 h-80 bg-[#06101c] rounded-r-xl border-l-[12px] border-[#02060a] shadow-[25px_25px_40px_rgba(0,0,0,0.9),inset_-5px_0_20px_rgba(0,0,0,0.8)] flex flex-col items-center justify-center transition-all duration-700 group-hover:-translate-y-6 group-hover:shadow-[0_40px_60px_rgba(139,168,204,0.25)]">
+                                <div className="absolute right-0 top-2 bottom-2 w-3 bg-gradient-to-b from-[#8ba8cc] via-[#a3c2e0] to-[#4a6582] rounded-r opacity-70"></div>
+                                <div className="absolute inset-2 border-2 border-[#8ba8cc]/30 rounded-r-lg pointer-events-none"></div>
+                                <div className="absolute inset-4 border border-[#8ba8cc]/10 rounded-r-md pointer-events-none"></div>
+                                <Icon name="cross" size={50} className="text-[#8ba8cc] mb-8 drop-shadow-[0_0_15px_rgba(139,168,204,0.6)]" />
+                                <h3 className="font-serif-classic text-[#8ba8cc] text-2xl uppercase tracking-[0.3em] font-black text-center px-4 drop-shadow-md">
+                                    {lang === 'en' ? "Holy Bible" : "Bíblia Sagrada"}
+                                </h3>
+                                <div className="absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 border-[#8ba8cc]/60"></div>
+                                <div className="absolute top-3 right-5 w-6 h-6 border-t-2 border-r-2 border-[#8ba8cc]/60"></div>
+                                <div className="absolute bottom-3 left-3 w-6 h-6 border-b-2 border-l-2 border-[#8ba8cc]/60"></div>
+                                <div className="absolute bottom-3 right-5 w-6 h-6 border-b-2 border-r-2 border-[#8ba8cc]/60"></div>
+                            </div>
+                            <p className="mt-12 text-[#8ba8cc] font-bold uppercase tracking-widest text-sm animate-pulse drop-shadow-[0_0_10px_rgba(139,168,204,0.5)] bg-black/50 px-6 py-2 rounded-full border border-[#8ba8cc]/30">
+                                {lang === 'en' ? "Tap to open the scriptures" : "Toque para abrir as escrituras"}
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="bible-card text-center animate-fadeIn w-full max-w-4xl mx-auto">
+                            <p className="text-[#8ba8cc] font-sans-ui font-bold tracking-[0.3em] text-[10px] uppercase mb-4">Illuminated Manuscript</p>
+                            <p className="text-zinc-400 font-sans-ui text-xs mb-8 uppercase tracking-widest">
+                                {lang === 'en' ? "Tap the glowing text to decode." : "Toque no texto brilhante para descodificar."}
+                            </p>
+                            <div className="text-3xl md:text-5xl font-serif-classic italic leading-relaxed text-zinc-200 mb-6 p-8 border border-[#8ba8cc]/20 bg-black/60 shadow-inner rounded cursor-default">
+                                {renderVerse()}
+                            </div>
+                            {openKey && (
+                                <div className="davinci-sketch text-left flex gap-6 items-center">
+                                    <div><Icon name={glossary[openKey].icon} size={40} className="text-[#8B6508]" /></div>
+                                    <div className="z-10 relative">
+                                        <p className="font-sans-ui font-black text-sm uppercase tracking-widest text-[#5c3c08] mb-1">{t(glossary[openKey].title, lang)}</p>
+                                        <p className="font-serif-classic text-2xl font-bold text-[#3e2723] mb-3">"{t(glossary[openKey].en, lang)}"</p>
+                                        <p className="font-serif-classic italic text-lg leading-relaxed text-[#6d4c41]">{t(glossary[openKey].sketch, lang)}</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const AnchorSlide = ({ s, lang, nextStep }) => {
+            const [built, setBuilt] = useState([]);
+            const [available, setAvailable] = useState([]);
+            const [msg, setMsg] = useState("");
+
+            useEffect(() => { 
+                setAvailable([...s.words].sort(() => Math.random() - 0.5)); 
+                setBuilt([]);
+                setMsg("");
+            }, [s.words]);
+
+            const handleWord = (w) => { setBuilt([...built, w]); setAvailable(available.filter(av => av !== w)); };
+
+            const check = () => {
+                if(built.join(" ") === s.correctPhrase) {
+                    setMsg(lang === 'en' ? "Boat anchored." : "Barco ancorado.");
+                    setTimeout(nextStep, 2500);
+                } else {
+                    setMsg(lang === 'en' ? "Sinking. Try again." : "A afundar. Tente de novo.");
+                    setAvailable([...s.words].sort(() => Math.random() - 0.5)); setBuilt([]);
+                }
+            };
+
+            return (
+                <div className="bible-card mx-auto max-w-4xl z-10 text-center animate-fadeIn">
+                    <Icon name="anchor" size={40} className="text-[#8ba8cc] mb-6 opacity-80" />
+                    <h2 className="font-sans-ui font-black text-2xl text-[#8ba8cc] uppercase tracking-[0.2em] mb-6">Drop the Anchor</h2>
+                    <p className="text-xl text-zinc-300 mb-8 font-serif-classic italic">
+                        {lang === 'en' ? 'Put the words in the correct order to stop the boat.' : 'Coloque as palavras na ordem correta para parar o barco.'}
+                    </p>
+
+                    <div className="min-h-[100px] border-2 border-dashed border-[#8ba8cc]/40 p-6 flex flex-wrap gap-4 mb-8 bg-black/40 items-center justify-center shadow-inner rounded">
+                        {built.map((w, i) => <div key={i} className="bg-white text-[#0a192f] px-6 py-3 font-bold font-serif-classic rounded shadow-md">{w}</div>)}
+                    </div>
+                    
+                    <div className="flex flex-wrap justify-center gap-4 mb-8">
+                        {available.map((w, i) => <div key={i} onClick={() => handleWord(w)} className="bg-[#1a365d] text-white px-6 py-3 font-bold font-serif-classic rounded opacity-70 hover:opacity-100 cursor-pointer border border-[#2c5282]">{w}</div>)}
+                    </div>
+
+                    <button onClick={check} className="btn-gold btn-ocean w-full text-sm">{lang === 'en' ? 'Drop Anchor' : 'Lançar Âncora'}</button>
+                    <p className="text-center mt-6 text-xl font-bold h-8 text-[#8ba8cc] tracking-widest uppercase">{msg}</p>
+                </div>
+            );
+        };
+
+        const SandboxSlide = ({ s, lang }) => {
+            const [subj, setSubj] = useState(null);
+            const results = { 
+                "I": { verb: "am", comp: "sleeping." }, 
+                "The boat": { verb: "is", comp: "rocking." }, 
+                "They": { verb: "are", comp: "panicking." } 
+            };
+            return (
+                <div className="text-center max-w-4xl animate-fadeIn w-full px-4 z-10 mx-auto">
+                    <Icon name="cubes" size={50} className="text-[#8ba8cc] mb-6 drop-shadow-md" />
+                    <h2 className="text-2xl font-sans-ui font-black mb-10 text-[#8ba8cc] uppercase tracking-[0.2em] drop-shadow-md">{t(s.title, lang)}</h2>
+                    <div className="flex justify-center gap-6 mb-12 flex-wrap">
+                        {["I", "The boat", "They"].map(sub => (
+                            <button key={sub} onClick={() => setSubj(sub)} className="bg-[#0a192f]/80 border-2 border-[#1a365d] text-white font-bold px-10 py-5 rounded hover:border-[#8ba8cc] transition-all shadow-lg text-xl tracking-wider hover:scale-105">{sub}</button>
+                        ))}
+                    </div>
+                    <div className="bible-card flex items-center justify-center min-h-[250px] !p-8">
+                        {subj ? (
+                            <p className="text-5xl font-serif-classic italic text-white animate-fadeIn drop-shadow-lg">{subj} <span className="text-[#8ba8cc] font-bold">{results[subj].verb}</span> {results[subj].comp}</p>
+                        ) : (
+                            <p className="text-3xl text-zinc-600 font-serif-classic italic">{lang === 'en' ? 'Select a subject...' : 'Selecione um sujeito...'}</p>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const DiscussionSlide = ({ s, lang }) => (
+            <div className="flex flex-col items-center justify-center h-full w-full max-w-4xl mx-auto p-8 animate-fadeIn z-10 text-center">
+                <Icon name={s.icon || "comments"} size={60} className="text-[#8ba8cc] mb-8 opacity-80 drop-shadow-[0_0_15px_rgba(139,168,204,0.5)]" />
+                <h2 className="text-2xl font-sans-ui font-black mb-6 text-[#8ba8cc] uppercase tracking-[0.2em]">{t(s.title, lang)}</h2>
+                <p className="text-3xl md:text-5xl text-white font-serif-classic italic leading-relaxed mb-12">"{t(s.question, lang)}"</p>
+                <div className="bg-[#02060a]/80 border border-[#1a365d]/50 p-8 w-full max-w-2xl text-left backdrop-blur-md rounded shadow-inner">
+                    <p className="text-[#8ba8cc] font-bold uppercase tracking-widest text-[10px] mb-4 flex items-center gap-2"><Icon name="lightbulb" size={14}/> {lang === 'en' ? 'Speaking Starters (A1)' : 'Para Iniciar a Conversa (A1)'}</p>
+                    <div className="space-y-3">
+                        {t(s.hint, lang).split('/').map((h, i) => (
+                            <p key={i} className="text-lg text-zinc-300 font-sans-ui font-light border-l-2 border-[#1a365d] pl-4 py-1 hover:border-[#8ba8cc] transition-colors cursor-default">"{h.trim()}"</p>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+
+        const WritingSlide = ({ s, lang }) => (
+            <div className="flex flex-col items-center justify-center h-full w-full max-w-4xl mx-auto p-8 animate-fadeIn z-10 text-center">
+                <Icon name="feather-pointed" size={50} className="text-[#8ba8cc] mb-8 opacity-80" />
+                <h2 className="text-3xl font-sans-ui font-black mb-8 text-white uppercase tracking-widest">{t(s.title, lang)}</h2>
+                <p className="text-2xl text-zinc-300 font-serif-classic italic leading-relaxed mb-8">{t(s.sub, lang)}</p>
+                <div className="bg-[#02060a]/80 border border-[#1a365d]/50 p-8 w-full text-left rounded shadow-xl">
+                    <p className="text-[#8ba8cc] font-bold uppercase tracking-widest text-xs mb-4">Prompt</p>
+                    <p className="text-2xl text-zinc-200 font-serif-classic italic">{t(s.prompt, lang)}</p>
+                </div>
+            </div>
+        );
+
+        const PrayerRoom = ({ lang }) => {
+            const [recording, setRecording] = useState(false);
+            const [recorded, setRecorded] = useState(false);
+            const [progress, setProgress] = useState(0);
+
+            useEffect(() => {
+                let interval;
+                if (recording) { interval = setInterval(() => { setProgress(p => { if (p >= 100) { setRecording(false); setRecorded(true); return 100; } return p + 2; }); }, 100); }
+                return () => clearInterval(interval);
+            }, [recording]);
+
+            const statusText = recording ? (lang === 'en' ? "Recording..." : "A gravar...") : recorded ? (lang === 'en' ? "Prayer Sent" : "Oração Enviada") : (lang === 'en' ? "Tap to Record" : "Toque para Gravar");
+
+            return (
+                <div className="bible-card text-center animate-fadeIn mx-auto z-10 max-w-3xl">
+                    <p className="text-[#8ba8cc] font-sans-ui font-bold tracking-[0.3em] text-[10px] uppercase mb-4">The Prayer Room</p>
+                    <h2 className="text-5xl font-serif-classic italic text-white mb-6">Speak Life</h2>
+                    <p className="text-zinc-400 font-sans-ui text-base mb-10">{lang === 'en' ? "Read the prayer aloud. Practice Present Continuous." : "Leia a oração em voz alta. Pratique Present Continuous."}</p>
+                    <div className="bg-[#02060a] border border-[#1a365d] p-8 md:p-12 mb-10 rounded shadow-inner">
+                        <p className="text-3xl md:text-4xl font-serif-classic italic text-zinc-200 leading-relaxed">
+                            "Lord, the storm <span className="text-[#8ba8cc] font-bold">is raging</span>.<br/><br/>
+                            But I <span className="text-[#8ba8cc] font-bold">am trusting</span> You.<br/><br/>
+                            You give me peace.<br/><br/>
+                            Amen."
+                        </p>
+                    </div>
+                    <div className="flex flex-col items-center">
+                        <button onClick={() => { if(!recorded && !recording){ setRecording(true); setProgress(0); } }} disabled={recorded}
+                            className={`w-24 h-24 rounded-full flex items-center justify-center transition-all ${recording ? 'bg-red-900 text-red-500 animate-pulse shadow-[0_0_40px_rgba(220,38,38,0.6)]' : recorded ? 'bg-[#1a365d] text-[#8ba8cc] border border-[#8ba8cc] shadow-[0_0_20px_rgba(139,168,204,0.3)]' : 'bg-black border border-[#8ba8cc] text-[#8ba8cc] hover:bg-[#0a192f] hover:scale-105 shadow-[0_0_15px_rgba(139,168,204,0.3)]'}`}>
+                            <Icon name={recorded ? "check" : "microphone-lines"} size={40} />
+                        </button>
+                        {recording && (<div className="w-56 h-2 bg-zinc-800 mt-6 rounded-full overflow-hidden border border-zinc-700"><div className="h-full bg-gradient-to-r from-[#4a6582] to-[#8ba8cc] transition-all" style={{width: `${progress}%`}}></div></div>)}
+                        <p className="mt-6 text-sm font-bold uppercase tracking-widest text-[#8ba8cc]">{statusText}</p>
+                    </div>
+                </div>
+            );
+        };
+
+        const EndSlide = ({ lang }) => (
+            <div className="flex flex-col items-center justify-center h-full w-full max-w-4xl mx-auto text-center p-8 animate-fadeIn z-10">
+                <Icon name="sun" size={80} className="text-[#8ba8cc] mb-8 opacity-90 drop-shadow-[0_0_30px_rgba(139,168,204,1)] animate-pulse" />
+                <h1 className="text-5xl md:text-7xl font-serif-classic italic mb-6 text-white tracking-tight drop-shadow-lg">The sea is calm.</h1>
+                <p className="text-[#a3c2e0] font-sans-ui text-sm font-bold tracking-[0.3em] uppercase mb-12">{lang === 'en' ? "You are safe." : "Estás seguro."}</p>
+                <button className="btn-gold btn-ocean px-12 py-4 text-sm" onClick={() => window.location.reload()}>{lang === 'en' ? 'Return to the shore' : 'Voltar à Margem'}</button>
+            </div>
+        );
+
+        // ==========================================
+        // 📚 26 SLIDES DATA (A1 Level - Storm Focus)
+        // ==========================================
+        const SLIDES_DATA = [
+            { type: "cover", title: { en: "Peace, Be Still", pt: "Paz, Aquieta-te" }, subtitle: { en: "Jesus Calms The Storm", pt: "Jesus Acalma a Tempestade" }, level: "A1 (Beginner)", grammar: "Present Continuous" },
+            { type: "guide", title: { en: "Teacher's Guide", pt: "Guia do Professor" }, content: { en: "Welcome to Lesson 3. In this module, students will master the Present Continuous (Action happening NOW) while exploring the story of Jesus calming the storm from the classic JESUS film. We will learn weather vocabulary, emotional states, and analyze the famous video scene.", pt: "Bem-vindo à Aula 3. Neste módulo, os alunos vão dominar o Present Continuous (Ação a acontecer AGORA) enquanto exploram a história de Jesus acalmando a tempestade no clássico filme JESUS. Analisaremos a cena de vídeo e vocabulário." } },
+            { type: "discussion", icon: "cloud-bolt", title: { en: "The Storms of Life", pt: "As Tempestades da Vida" }, question: { en: "What makes you afraid?", pt: "O que te dá medo?" }, hint: { en: "I am afraid of the dark. / I am afraid when it rains.", pt: "Tenho medo do escuro. / Tenho medo quando chove." } },
+            { type: "lexicon", title: { en: "Weather Words", pt: "Palavras do Clima" }, words: [ { word: "Rain", icon: "cloud-rain", meaning: { en: "Water falling from the sky", pt: "Chuva" } }, { word: "Wind", icon: "wind", meaning: { en: "Moving air", pt: "Vento" } }, { word: "Wave", icon: "water", meaning: { en: "Moving water on the sea", pt: "Onda" } } ] },
+            { type: "lexicon", title: { en: "Emotions", pt: "Emoções" }, words: [ { word: "Afraid", emoji: "😨", meaning: { en: "Feeling fear", pt: "Com medo" } }, { word: "Safe", icon: "shield", meaning: { en: "Not in danger", pt: "Seguro" } }, { word: "Calm", emoji: "😌", meaning: { en: "Peaceful", pt: "Calmo" } } ] },
+            { type: "reader", chapter: 1, title: { en: "The Boat", pt: "O Barco" }, chunks: [ { en: "They are in a boat.", pt: "Eles estão num barco." }, { en: "They are sailing.", pt: "Eles estão a navegar." }, { en: "The wind is blowing.", pt: "O vento está a soprar." } ] },
+            { type: "grammar", title: { en: "Present Continuous (+)", pt: "Presente Contínuo (+)" }, subtitle: { en: "Actions happening RIGHT NOW.", pt: "Ações a acontecerem AGORA MESMO." }, rules: [ { enPrefix: "The wind", enVerb: "is blowing", ptTranslation: "(O vento está a soprar)", enExample: "The wind is blowing." }, { enPrefix: "They", enVerb: "are sailing", ptTranslation: "(Eles estão a navegar)", enExample: "They are sailing on the sea." } ] },
+            { type: "grammar", title: { en: "Present Continuous (-)", pt: "Presente Contínuo (-)" }, subtitle: { en: "Saying NO right now.", pt: "Dizer NÃO agora mesmo." }, rules: [ { enPrefix: "He", enVerb: "is not sleeping", ptTranslation: "(Ele não está a dormir)", enExample: "He is not sleeping." }, { enPrefix: "They", enVerb: "are not safe", ptTranslation: "(Eles não estão seguros)", enExample: "They are not safe in the storm." } ] },
+            { type: "discussion", icon: "face-frown", title: { en: "Panic vs Peace", pt: "Pânico vs Paz" }, question: { en: "What do you do when you are in danger?", pt: "O que fazes quando estás em perigo?" }, hint: { en: "I am crying. / I am running away.", pt: "Eu choro (estou a chorar). / Eu fujo (estou a fugir)." } },
+            { type: "scholar", title: { en: "Pre-Video Focus", pt: "Foco Pré-Vídeo" }, content: { en: "The Sea of Galilee is beautiful but dangerous. Sudden storms come quickly. The disciples are fishermen, but they are terrified. Let's watch what happens.", pt: "O Mar da Galileia é belo mas perigoso. Tempestades repentinas chegam rápido. Os discípulos são pescadores, mas estão aterrorizados. Vamos ver o que acontece." } },
+            { type: "video", title: { en: "The Storm Scene", pt: "A Cena da Tempestade" }, mission: { en: "Watch the disciples panic.", pt: "Observe o pânico dos discípulos." }, start: 0, lang: "en" },
+            { type: "script", speaker: { en: "The Disciples", pt: "Os Discípulos" }, quote: { en: "Teacher, we are dying! Wake up!", pt: "Mestre, estamos a morrer! Acorda!" }, analysis: { en: "The disciples are panicking. They think they are not safe.", pt: "Os discípulos estão em pânico. Eles acham que não estão seguros." }, grammarNote: { en: "'Are dying' is Present Continuous. It is happening NOW.", pt: "'Are dying' é Present Continuous. Está a acontecer AGORA." } },
+            { type: "quiz", question: { en: "What is Jesus doing during the storm?", pt: "O que Jesus está a fazer durante a tempestade?" }, options: [ { en: "He is praying.", pt: "Ele está a orar." }, { en: "He is sleeping.", pt: "Ele está a dormir." }, { en: "He is crying.", pt: "Ele está a chorar." } ], answerIndex: 1, explanation: { en: "Correct! He is sleeping peacefully.", pt: "Correto! Ele está a dormir pacificamente." } },
+            { type: "calmer", title: { en: "Calm the Storm", pt: "Acalma a Tempestade" }, instruction: { en: "Choose the correct Present Continuous verb to stop the storm.", pt: "Escolhe o verbo correto no Present Continuous para parar a tempestade." }, tasks: [{subject: "The rain", object: "falling.", verbs: ["fall", "is falling", "are falling"], correctVerb: "is falling"}, {subject: "The waves", object: "crashing.", verbs: ["is crashing", "are crashing", "crash"], correctVerb: "are crashing"}] },
+            { type: "illuminated" },
+            { type: "reader", chapter: 3, title: { en: "The Miracle", pt: "O Milagre" }, chunks: [ { en: "They wake Him up.", pt: "Eles acordam-nO." }, { en: "He is standing.", pt: "Ele está de pé." }, { en: "He says: Peace, be still.", pt: "Ele diz: Paz, aquieta-te." } ] },
+            { type: "anchor", words: ["The", "wind", "is", "stopping", "now."], correctPhrase: "The wind is stopping now." },
+            { type: "discussion", icon: "question", title: { en: "Who is He?", pt: "Quem é Ele?" }, question: { en: "Even the wind and sea obey Him. Who is Jesus to you?", pt: "Até o vento e o mar Lhe obedecem. Quem é Jesus para ti?" }, hint: { en: "He is God. / He is strong. / He is peace.", pt: "Ele é Deus. / Ele é forte. / Ele é paz." } },
+            { type: "reader", chapter: 4, title: { en: "The Calm", pt: "A Calma" }, chunks: [ { en: "The wind is stopping.", pt: "O vento está a parar." }, { en: "The sea is calm.", pt: "O mar está calmo." }, { en: "They are safe.", pt: "Eles estão seguros." } ] },
+            { type: "sandbox", title: { en: "Grammar Builder", pt: "Construtor de Gramática" } },
+            { type: "discussion", icon: "sun", title: { en: "Calm in Your Life", pt: "Calma na Tua Vida" }, question: { en: "When do you feel 'calm'?", pt: "Quando te sentes 'calmo'?" }, hint: { en: "I feel calm when I am sleeping. / I feel calm when I am with my family.", pt: "Sinto-me calmo quando estou a dormir. / Sinto-me calmo quando estou com a minha família." } },
+            { type: "writing", title: { en: "The Scribe's Journal", pt: "O Diário do Escriba" }, sub: { en: "Write about what you are doing right now.", pt: "Escreve sobre o que estás a fazer agora mesmo." }, prompt: { en: "Right now, I am... (Use Present Continuous).", pt: "Right now, I am... (Usa o Present Continuous)." } },
+            { type: "prayer" },
+            { type: "writing", title: { en: "Your Anchor", pt: "A Tua Âncora" }, sub: { en: "Write your truth.", pt: "Escreve a tua verdade." }, prompt: { en: "Jesus is my peace.", pt: "Jesus is my peace. (Jesus é a minha paz)." } },
+            { type: "end" }
+        ];
+
+        function App() {
+            const [slideIdx, setSlideIdx] = useState(0);
+            const [lang, setLang] = useState('en');
+            const [isFs, setIsFs] = useState(false);
+
+            useEffect(() => {
+                const handleFsChange = () => setIsFs(!!document.fullscreenElement);
+                document.addEventListener('fullscreenchange', handleFsChange);
+                return () => document.removeEventListener('fullscreenchange', handleFsChange);
+            }, []);
+
+            const toggleFs = async () => {
+                try {
+                    if (!document.fullscreenElement) {
+                        if (document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
+                    } else {
+                        if (document.exitFullscreen) await document.exitFullscreen();
+                    }
+                } catch (e) { console.warn("Fullscreen issue:", e); }
+            };
+
+            const toggleLang = () => setLang(l => l === 'en' ? 'pt' : 'en');
+            const next = () => { if (slideIdx < SLIDES_DATA.length - 1) setSlideIdx(s => s + 1); };
+            const prev = () => { if (slideIdx > 0) setSlideIdx(s => s - 1); };
+
+            const current = SLIDES_DATA[slideIdx];
+
+            const renderSlide = () => {
+                switch (current.type) {
+                    case "cover": return <CoverSlide s={current} lang={lang} next={next} />;
+                    case "guide": return <GuideSlide s={current} lang={lang} />;
+                    case "lexicon": return <LexiconSlide s={current} lang={lang} />;
+                    case "reader": return <ReaderSlide s={current} lang={lang} />;
+                    case "grammar": return <GrammarSlide s={current} lang={lang} />;
+                    case "calmer": return <StormCalmerSlide key={slideIdx} s={current} lang={lang} nextStep={next} />;
+                    case "discussion": return <DiscussionSlide s={current} lang={lang} />;
+                    case "sandbox": return <SandboxSlide s={current} lang={lang} />;
+                    case "writing": return <WritingSlide s={current} lang={lang} />;
+                    case "illuminated": return <IlluminatedText lang={lang} />;
+                    case "anchor": return <AnchorSlide key={slideIdx} s={current} lang={lang} nextStep={next} />;
+                    case "prayer": return <PrayerRoom lang={lang} />;
+                    case "scholar": return <ScholarDeskSlide title={current.title} content={current.content} lang={lang} />;
+                    case "video": return <VideoSlide title={current.title} mission={current.mission} start={current.start} lang={lang} />;
+                    case "script": return <ScriptSlide speaker={current.speaker} quote={current.quote} analysis={current.analysis} grammarNote={current.grammarNote} lang={lang} />;
+                    case "quiz": return <QuizSlide question={current.question} options={current.options} answerIndex={current.answerIndex} explanation={current.explanation} nextAction={next} lang={lang} />;
+                    case "end": return <EndSlide lang={lang} />;
+                    default: return <div className="text-white text-2xl z-10">Slide not found.</div>;
+                }
+            };
+
+            return (
+                <div className="w-full h-screen relative flex flex-col font-sans-ui selection:bg-[#8ba8cc]/40 selection:text-white bg-[#02060a]">
+                    <div className="water-texture"></div>
+                    <div className="gilded-edges gilded-edge-left"></div>
+                    <div className="gilded-edges gilded-edge-right"></div>
+                    <div className="gold-foil-frame"></div>
+                    <div className="bookmark-ribbon"></div>
+                    
+                    {/* Teacher Tools Dropdown Menu */}
+                    <div className="fixed top-6 right-6 z-[100] flex gap-3">
+                        <button onClick={toggleLang} className={`bg-black/80 border text-[#8ba8cc] px-4 h-12 rounded transition-all font-bold text-xs uppercase tracking-widest backdrop-blur-md shadow-lg ${lang === 'pt' ? 'border-[#8ba8cc] bg-[#8ba8cc]/20 shadow-[0_0_15px_rgba(139,168,204,0.4)]' : 'border-[#8ba8cc]/50 hover:bg-[#8ba8cc]/10'}`}>
+                            <Icon name="globe" size={14} className="mr-2"/> {lang === 'en' ? 'PT' : 'EN'}
+                        </button>
+                        <button onClick={toggleFs} className="bg-black/80 border border-blue-500/50 text-blue-400 w-12 h-12 rounded hover:bg-blue-500/20 transition-all flex items-center justify-center backdrop-blur-md shadow-lg" title={lang === 'en' ? "Fullscreen" : "Tela Cheia"}><Icon name={isFs ? "compress" : "expand"} size={18} /></button>
+                    </div>
+
+                    <div className="flex-1 relative z-10 w-full h-full overflow-y-auto safe-scroll-container">
+                        <div className="safe-scroll-content">
+                            {renderSlide()}
+                        </div>
+                    </div>
+
+                    {slideIdx > 0 && current.type !== 'end' && (
+                        <div className="z-50 w-full p-6 absolute bottom-0 flex flex-col items-center bg-gradient-to-t from-[#02060a] via-[#02060a]/90 to-transparent">
+                            <div className="max-w-5xl w-full flex justify-between items-center relative">
+                                <button onClick={prev} disabled={slideIdx === 0} className="text-[#4a6582] hover:text-[#8ba8cc] font-bold text-xs uppercase tracking-widest disabled:opacity-30 transition-colors flex items-center gap-2 drop-shadow-md">
+                                    <Icon name="chevron-left" size={14} /> {lang === 'en' ? 'Back' : 'Anterior'}
+                                </button>
+                                
+                                <div className="absolute left-1/2 transform -translate-x-1/2 text-[#8ba8cc] font-bold tracking-[0.3em] text-[10px] uppercase hidden sm:block opacity-70">
+                                    {lang === 'en' ? 'PAGE' : 'PÁGINA'} {slideIdx + 1} {lang === 'en' ? 'OF' : 'DE'} {SLIDES_DATA.length}
+                                </div>
+
+                                <button onClick={next} disabled={slideIdx === SLIDES_DATA.length - 1} className="text-[#4a6582] hover:text-[#8ba8cc] font-bold text-xs uppercase tracking-widest disabled:opacity-30 transition-colors flex items-center gap-2 drop-shadow-md">
+                                    {lang === 'en' ? 'Next' : 'Próximo'} <Icon name="chevron-right" size={14} />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+        
+        const rootElement = document.getElementById('root');
+        const root = ReactDOM.createRoot(rootElement);
+        root.render(<App />);
+    </script>
+</body>
+</html>
